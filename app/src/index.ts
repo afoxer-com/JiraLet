@@ -1,13 +1,22 @@
 const { app, BrowserWindow } = require('electron')
+require('@electron/remote/main').initialize()
 
 const createWindow = () => {
     const win = new BrowserWindow({
-        width: 800,
-        height: 600
+        width: 1024,
+        height: 900,
+        webPreferences: {
+            webSecurity: false,
+            nodeIntegration: true,
+            enableRemoteModule: true,
+            contextIsolation: false,
+            devTools: true
+        }
     })
 
     console.log(`current path is ${__dirname}`)
-    win.loadURL(`file://${__dirname}/web/index.html`)
+    win.loadURL(`file://${__dirname}/../webdist/index.html`)
+    require("@electron/remote/main").enable(win.webContents)
 }
 
 app.on('window-all-closed', () => {

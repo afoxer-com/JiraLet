@@ -1,6 +1,6 @@
 {
     "scripts": {
-        "start": "electron ./app/",
+        "start": "yarn build && electron ./app/",
         "build": "./build.sh"
     },
     "dependencies": {

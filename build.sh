@@ -1,18 +1,19 @@
 pwd
+
+ set +e
+ rm -rf app/webdist
+ set -e
+ mkdir -p app/webdist
+
 cd web
-npm run build
+yarn install
+yarn build
 
 cd ..
-set +e
-rm -rf app/dist/web
-set -e
-
-mkdir -p app/dist/web
-cp -rf web/dist/* app/dist/web/
 
 cd app
-npm run build
+yarn install
+yarn build
 
 cd ..
 pwd
-npm start

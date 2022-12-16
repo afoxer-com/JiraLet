@@ -1,33 +1,81 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import React from 'react';
+import Settings from './Settings';
+import Jira from './Jira';
+import { Layout, Menu } from 'antd';
+const { Header, Content, Footer, Sider } = Layout;
+
+import {
+  CloudOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
+import { jiraToken } from './jira-node-service';
+
+const TAB_JIRA = "jira";
+const TAB_SETTINGS = "settings";
+
 
 function App() {
-  const [count, setCount] = useState(0)
+  let tab_value = jiraToken() == "" ? TAB_SETTINGS : TAB_JIRA;
+  const [tab, setTab] = useState(tab_value)
+
+  function onSidebarSelected(e: any) {
+    console.log(`side bar clicked: ${e.key}`)
+    // if (e.key == TAB_JIRA) {
+    //   if (jiraToken() == "") {
+    //     const { dialog } = require('@electron/remote');
+    //     dialog.showMessageBox(null, {
+    //       type: "info",
+    //       message: "你还没有设置JIRA的Personal Token，无法访问JIRA",
+    //     }, (response: number, checkboxChecked: boolean) => {
+
+    //     });
+    //     setTab(TAB_SETTINGS)
+    //     return;
+    //   }
+    // }
+    setTab(e.key)
+  }
 
   return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
+    <Layout>
+      <Sider style={{
+        overflow: 'auto',
+        width:'20vh',
+        height: '100vh',
+        position: 'fixed',
+        left: 0,
+        top: 0,
+        bottom: 0,
+      }}>
+        <Menu theme="dark" mode="inline" defaultSelectedKeys={[tab_value]} selectedKeys={[tab]} items={[
+          {
+            key: TAB_SETTINGS, icon: React.createElement(UserOutlined), label: '设置'
+          },
+          {
+            key: TAB_JIRA, icon: React.createElement(CloudOutlined), label: 'JIRA建单助手'
+          }
+        ]} onSelect={onSidebarSelected} />
+      </Sider>
+
+      <Layout style={{ marginLeft: '22vh' }}>
+        <Content style={{ margin: '20px 16px' }}>
+          <div style={{
+            display: tab == TAB_JIRA ? 'block' : 'none'
+          }}>
+            <Jira onJiraTokenEmpty={() => {
+              console.log("onJiraTokenEmpty is called.")
+              setTab(TAB_SETTINGS)
+            }} />
+          </div>
+          <div style={{
+            display: tab == TAB_SETTINGS ? 'block' : 'none'
+          }}>
+            <Settings />
+          </div>
+        </Content>
+      </Layout>
+    </Layout >
   )
 }
 
