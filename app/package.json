@@ -1,18 +1,17 @@
 {
     "scripts": {
-        "start": "electron ./app/",
-        "build": "./build.sh"
-    },
-    "dependencies": {
-        "child_process":"1.0.2"
+        "start": "npm run build & electron .",
+        "build": "tsc",
+        "package": "electron-builder"
     },
     "devDependencies": {
         "electron": "^22.0.0",
+        "electron-builder": "^22.10.3",
         "typescript": "^4.9.3"
     },
     "name": "jiralet",
     "version": "1.0.0",
-    "main": "dist/build.js",
+    "main": "dist/index.js",
     "repository": "git@github.com:afoxer-com/JiraLet.git",
     "author": "sidney.wang <sidney.wang@foxmail.com>",
     "license": "MIT"
