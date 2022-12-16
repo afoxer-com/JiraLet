@@ -1,0 +1,15 @@
+{
+    "scripts": {
+        "start": "electron .",
+        "build": "tsc"
+    },
+    "devDependencies": {
+        "electron": "^22.0.0"
+    },
+    "name": "jiralet",
+    "version": "1.0.0",
+    "main": "dist/index.js",
+    "repository": "git@github.com:afoxer-com/JiraLet.git",
+    "author": "sidney.wang <sidney.wang@foxmail.com>",
+    "license": "MIT"
+}
