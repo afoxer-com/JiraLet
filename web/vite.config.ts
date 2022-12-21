@@ -16,7 +16,7 @@ export default defineConfig((env) => {
                 output: {
                     format: 'commonjs',     // Electron 目前只支持 CommonJs 格式
                 },
-                external: [          // 告诉 Rollup 不要打包内建 API
+                external: [                 // 告诉 Rollup 不要打包内建 API
                     'electron',
                     'got',
                     '@electron/remote',

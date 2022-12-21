@@ -1,13 +1,13 @@
 {
     "scripts": {
         "dev": "vite",
-        "build": "tsc && vite build",
+        "build": "vite build",
         "preview": "vite preview"
     },
     "dependencies": {
         "@electron/remote": "^2.0.9",
         "antd": "^5.0.7",
-        "got": "^12.5.3",
+        "got": "^11.8.3",
         "react": "^18.2.0",
         "react-dom": "^18.2.0"
     },

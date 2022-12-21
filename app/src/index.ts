@@ -1,5 +1,6 @@
-const { app, BrowserWindow } = require('electron')
+const {app, BrowserWindow} = require('electron')
 require('@electron/remote/main').initialize()
+const updater = require('electron-simple-updater');
 
 const createWindow = () => {
     const win = new BrowserWindow({
@@ -30,3 +31,5 @@ app.whenReady().then(() => {
         if (BrowserWindow.getAllWindows().length === 0) createWindow()
     })
 })
+
+updater.init('https://raw.githubusercontent.com/afoxer-com/JiraLet/main/updates.json');

@@ -4,3 +4,4 @@ dist
 webdist
 appdist
 .DS_Store
+.fleet

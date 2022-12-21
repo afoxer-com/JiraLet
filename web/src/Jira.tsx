@@ -236,7 +236,6 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
             let line = lines[i].trim();
             if (line == "") {
                 // skip empty line
-                continue
             } else if (line.startsWith("assignee:")) {
                 let emailRegex = /^\S+@\S+$/
                 let email = line.replace("assignee:", "").trim()
@@ -244,7 +243,6 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
                     callback(`line ${i + 1} wrong: You should write the correct email address by 'assignee: xxx@shopee.com', currently it is '${email}'.`)
                 }
                 hasAssignee = true;
-                continue
             } else {
                 if (!hasAssignee) {
                     callback(`line ${i + 1} wrong: You should first present a assignee by 'assignee: xxx@shopee.com' before input tasks.`)
