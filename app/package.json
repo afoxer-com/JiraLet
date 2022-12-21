@@ -22,6 +22,8 @@
     "author": "sidney.wang <sidney.wang@foxmail.com>",
     "license": "MIT",
     "dependencies": {
-        "@electron/remote": "^2.0.9"
+        "@electron/remote": "^2.0.9",
+        "got": "^11.8.3",
+        "update-electron-app": "^2.0.1"
     }
 }

@@ -1,5 +1,6 @@
 const { app, BrowserWindow } = require('electron')
 require('@electron/remote/main').initialize()
+require('update-electron-app')()
 
 const createWindow = () => {
     const win = new BrowserWindow({

@@ -40,7 +40,7 @@ export interface Issue {
     }
 }
 
-export function fetchIssue(issueId: string): CancelableRequest<Issue> {
+export function fetchIssue(issueId: string): Promise<Issue> {
     return got.get(`https://jira.shopee.io/rest/api/2/issue/${issueId}`, {
         headers: {
             "Authorization": `Bearer ${jiraToken()}`
@@ -64,7 +64,7 @@ export interface SearchResult {
     issues: QueriedIssue[]
 }
 
-export function searchIssues(jql: string, start: number, max: number): CancelableRequest<SearchResult> {
+export function searchIssues(jql: string, start: number, max: number): Promise<SearchResult> {
     return got.post(`https://jira.shopee.io/rest/api/2/search`, {
         json: {
             jql: jql,
@@ -195,7 +195,7 @@ export interface Project {
     }
 }
 
-export function getProjects(): CancelableRequest<[Project]> {
+export function getProjects(): Promise<[Project]> {
     return got.get(`https://jira.shopee.io/rest/api/2/project`, {
         headers: {
             "Authorization": `Bearer ${jiraToken()}`
@@ -306,7 +306,7 @@ export interface QueriedUser {
     name: string,
     key: string,
     html?: string,
-    displayName: string 
+    displayName: string
 }
 
 export interface QueriedUsers {
