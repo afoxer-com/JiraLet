@@ -20,6 +20,7 @@ import {
 } from './jira-logic';
 import { FormInstance, Rule, RuleObject } from 'antd/es/form';
 import { StoreValue } from 'antd/es/form/interface';
+import {JIRA_DOMAIN} from "./Const";
 const taskRegex = /^(.*\S+)\s+(\d+(\.\d+)?)$/
 const defaultMode = "function-sub";
 
@@ -507,9 +508,9 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
                 renderItem={(item) => (
                     <List.Item onClick={(value) => {
                         const { shell } = require('@electron/remote');
-                        shell.openExternal(`https://jira.shopee.io/browse/${item.key}`);
+                        shell.openExternal(`https://${JIRA_DOMAIN}/browse/${item.key}`);
                     }}>
-                        {`[${item.fields.issuetype.name}] ${item.fields.summary} => https://jira.shopee.io/browse/${item.key}`}
+                        {`[${item.fields.issuetype.name}] ${item.fields.summary} => https://${JIRA_DOMAIN}/browse/${item.key}`}
                     </List.Item>
                 )}
             />

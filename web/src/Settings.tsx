@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Button, Form, Input, Space, Tooltip } from 'antd';
-import { JIRA_TOKEN_KEY } from './Const'
+import {JIRA_DOMAIN, JIRA_TOKEN_KEY} from './Const'
 import { saveJiraToken } from './jira-node-service';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 
@@ -46,7 +46,7 @@ function Settings() {
                             <Button shape="circle" icon={<QuestionCircleOutlined />} onClick={
                                 (event) => {
                                     const { shell } = require('@electron/remote');
-                                    shell.openExternal(`https://jira.shopee.io/secure/ViewProfile.jspa?selectedTab=com.atlassian.pats.pats-plugin:jira-user-personal-access-tokens`);
+                                    shell.openExternal(`https://${JIRA_DOMAIN}/secure/ViewProfile.jspa?selectedTab=com.atlassian.pats.pats-plugin:jira-user-personal-access-tokens`);
                                 }
                             } />
                         </Tooltip>

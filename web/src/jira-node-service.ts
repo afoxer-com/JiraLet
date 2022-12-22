@@ -1,5 +1,5 @@
 import got, {CancelableRequest} from "got";
-import {JIRA_MYSELF_KEY, JIRA_PROJECT_DETAIL_KEY_PREFIX, JIRA_TOKEN_KEY} from "./Const";
+import {JIRA_DOMAIN, JIRA_MYSELF_KEY, JIRA_PROJECT_DETAIL_KEY_PREFIX, JIRA_TOKEN_KEY} from "./Const";
 
 let JIRA_TOKEN: string | undefined | null = null;
 export const SEATALK_PRJ_KEY = "SPSTKSZ"
@@ -41,7 +41,7 @@ export interface Issue {
 }
 
 export function fetchIssue(issueId: string): Promise<Issue> {
-    return got.get(`https://jira.shopee.io/rest/api/2/issue/${issueId}`, {
+    return got.get(`https://${JIRA_DOMAIN}/rest/api/2/issue/${issueId}`, {
         headers: {
             "Authorization": `Bearer ${jiraToken()}`
         },
@@ -65,7 +65,7 @@ export interface SearchResult {
 }
 
 export function searchIssues(jql: string, start: number, max: number): Promise<SearchResult> {
-    return got.post(`https://jira.shopee.io/rest/api/2/search`, {
+    return got.post(`https://${JIRA_DOMAIN}/rest/api/2/search`, {
         json: {
             jql: jql,
             startAt: start,
@@ -120,7 +120,7 @@ export interface IssueCreateRequest {
 
 export function createIssue(request: IssueCreateRequest): Promise<IssueCreateResult> {
     console.log(`begin create issue: ${JSON.stringify(request)}`)
-    return got.post(`https://jira.shopee.io/rest/api/2/issue`, {
+    return got.post(`https://${JIRA_DOMAIN}/rest/api/2/issue`, {
         json: request,
         headers: {
             "Authorization": `Bearer ${jiraToken()}`,
@@ -139,7 +139,7 @@ export interface BulkCreateResult {
 
 export function bulkCreateIssue(request: BulkCreateRequest): Promise<BulkCreateResult> {
     console.log(`begin create issue: ${JSON.stringify(request)}`)
-    return got.post(`https://jira.shopee.io/rest/api/2/issue/bulk`, {
+    return got.post(`https://${JIRA_DOMAIN}/rest/api/2/issue/bulk`, {
         json: request,
         headers: {
             "Authorization": `Bearer ${jiraToken()}`,
@@ -162,7 +162,7 @@ export interface LinkRequest {
 
 export function linkIssues(request: LinkRequest): Promise<boolean> {
     console.log(`begin link issue: ${JSON.stringify(request)}`)
-    return got.post(`https://jira.shopee.io/rest/api/2/issueLink`, {
+    return got.post(`https://${JIRA_DOMAIN}/rest/api/2/issueLink`, {
         json: request,
         headers: {
             "Authorization": `Bearer ${jiraToken()}`,
@@ -196,7 +196,7 @@ export interface Project {
 }
 
 export function getProjects(): Promise<[Project]> {
-    return got.get(`https://jira.shopee.io/rest/api/2/project`, {
+    return got.get(`https://${JIRA_DOMAIN}/rest/api/2/project`, {
         headers: {
             "Authorization": `Bearer ${jiraToken()}`
         },
@@ -292,7 +292,7 @@ export function getProject(fetch: boolean = true): Promise<ProjectDetail> {
 }
 
 function fetchProject(): Promise<ProjectDetail> {
-    return got.get(`https://jira.shopee.io/rest/api/2/project/${SEATALK_PRJ_KEY}`, {
+    return got.get(`https://${JIRA_DOMAIN}/rest/api/2/project/${SEATALK_PRJ_KEY}`, {
         headers: {
             "Authorization": `Bearer ${jiraToken()}`
         },
@@ -321,7 +321,7 @@ export interface QueriedUsers {
 }
 
 export function queryUser(keyword: string, max: number): Promise<QueriedUsers> {
-    return got.get(`https://jira.shopee.io/rest/api/2/groupuserpicker?query=${keyword}&maxResults=${max}&projectId=${SEATALK_PRJ_ID}`, {
+    return got.get(`https://${JIRA_DOMAIN}/rest/api/2/groupuserpicker?query=${keyword}&maxResults=${max}&projectId=${SEATALK_PRJ_ID}`, {
         headers: {
             "Authorization": `Bearer ${jiraToken()}`
         },
@@ -407,7 +407,7 @@ export function getMyselfInfo(fetch: boolean = true): Promise<UserInfo> {
 
 function fetchMyselfInfo(): Promise<UserInfo> {
     console.log(`begin fetch myself info.`)
-    return got.get(`https://jira.shopee.io/rest/api/2/myself`, {
+    return got.get(`https://${JIRA_DOMAIN}/rest/api/2/myself`, {
         headers: {
             "Authorization": `Bearer ${jiraToken()}`
         },

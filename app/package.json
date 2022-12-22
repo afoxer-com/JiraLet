@@ -16,7 +16,7 @@
         }
     },
     "name": "jiralet",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "main": "appdist/index.js",
     "repository": "git@github.com:afoxer-com/JiraLet.git",
     "author": "sidney.wang <sidney.wang@foxmail.com>",
@@ -26,5 +26,8 @@
         "electron-log": "^5.0.0-beta.6",
         "electron-simple-updater": "^2.0.11",
         "got": "^11.8.3"
+    },
+    "updater": {
+        "url": "https://raw.githubusercontent.com/afoxer-com/JiraLet/main/updates.json"
     }
 }
