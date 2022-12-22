@@ -67,7 +67,7 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
 
         const collectSubtasks = (): SubTaskInfo[] => {
             console.log('begin collecting sub tasks.')
-            let result = []
+            let result: any[] = []
             let subAssignee = ""
             let lines = subtasks.split('\n');
             for (let i = 0; i < lines.length; i++) {
