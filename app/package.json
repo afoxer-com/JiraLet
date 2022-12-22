@@ -16,7 +16,7 @@
         }
     },
     "name": "jiralet",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "main": "appdist/index.js",
     "repository": "git@github.com:afoxer-com/JiraLet.git",
     "author": "sidney.wang <sidney.wang@foxmail.com>",
