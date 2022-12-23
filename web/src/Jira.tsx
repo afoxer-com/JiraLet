@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react'
-import { AutoComplete, Button, Divider, Drawer, Form, Input, List, message, Select, Space } from 'antd';
+import {useState, useRef} from 'react'
+import {AutoComplete, Button, Divider, Drawer, Form, Input, List, message, Select, Space, Checkbox} from 'antd';
 import {
     Issue,
     jiraToken,
@@ -18,9 +18,9 @@ import {
     SubTaskInfo,
     userSearch
 } from './jira-logic';
-import { FormInstance, Rule, RuleObject } from 'antd/es/form';
-import { StoreValue } from 'antd/es/form/interface';
+import {FormInstance, Rule, RuleObject} from 'antd/es/form';
 import {JIRA_DOMAIN} from "./Const";
+
 const taskRegex = /^(.*\S+)\s+(\d+(\.\d+)?)$/
 const defaultMode = "function-sub";
 
@@ -44,7 +44,7 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
 
     const onRootClick = (e: any) => {
         if (jiraToken() == "") {
-            const { dialog } = require('@electron/remote');
+            const {dialog} = require('@electron/remote');
             dialog.showMessageBox(null, {
                 type: "info",
                 message: "你还没有设置JIRA的Personal Token，无法访问JIRA",
@@ -58,12 +58,13 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
     const onFormFinish = (fieldsValue: any): void => {
         console.log(`form finished: ${JSON.stringify(fieldsValue)}`)
         let components: [string] = fieldsValue['components']
-        let labels: string = fieldsValue['labels']
-        let epic_title: string = fieldsValue['epic'] ?? ""
-        let function_title: string = fieldsValue['function'] ?? ""
+        let end: string = fieldsValue['end']
+        let epicTitle: string = fieldsValue['epic'] ?? ""
+        let functionTitle: string = fieldsValue['function'] ?? ""
         let subtasks: string = fieldsValue['sub'] ?? ""
         let description: string = fieldsValue['description'] ?? ""
         let assignee: string = fieldsValue['assignee'] ?? ""
+        let isTech: boolean = fieldsValue['isTech']
 
         const collectSubtasks = (): SubTaskInfo[] => {
             console.log('begin collecting sub tasks.')
@@ -86,10 +87,10 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
                         result.push({
                             summary: summary,
                             assignee: subAssignee,
-                            labels: [labels],
+                            labels: [end],
                             description: description,
                             components: components,
-                            parentKey: epic_title,
+                            parentKey: epicTitle,
                             storyPoints: Number.parseFloat(storyPoints)
                         })
                     }
@@ -102,11 +103,12 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
         switch (curMode) {
             case "epic": {
                 createEpic({
-                    summary: epic_title,
+                    summary: epicTitle,
                     assignee: assignee,
-                    labels: [labels],
+                    labels: [end],
                     description: description,
-                    components: components
+                    components: components,
+                    isTech: isTech
                 }).then((issue) => {
                     console.log(`abtain issue result after create => ${JSON.stringify(issue)}`)
                     updateCreatedIssues(issue)
@@ -117,12 +119,13 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
             }
             case "function": {
                 createFunction({
-                    epicKey: epic_title,
-                    summary: function_title,
+                    epicKey: epicTitle,
+                    summary: functionTitle,
                     assignee: assignee,
-                    labels: [labels],
+                    labels: [end],
                     description: description,
-                    components: components
+                    components: components,
+                    isTech: isTech
                 }).then((issue: Issue) => {
                     console.log(`abtain issue result after create => ${JSON.stringify(issue)}`)
                     updateCreatedIssues(issue)
@@ -140,12 +143,13 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
             }
             case "function-sub": {
                 createFunctionAndSubTasks({
-                    epicKey: epic_title,
-                    summary: function_title,
+                    epicKey: epicTitle,
+                    summary: functionTitle,
                     assignee: assignee,
-                    labels: [labels],
+                    labels: [end],
                     description: description,
-                    components: components
+                    components: components,
+                    isTech: isTech,
                 }, collectSubtasks(), (issue) => {
                     console.log(`create sub & function task result => ${issue.key}`)
                     updateCreatedIssues(issue)
@@ -154,18 +158,20 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
             }
             case "epic-function-sub": {
                 createEpicFuncSubTasks({
-                    summary: epic_title,
+                    summary: epicTitle,
                     assignee: assignee,
-                    labels: [labels],
+                    labels: [end],
                     description: description,
-                    components: components
+                    components: components,
+                    isTech: isTech
                 }, {
-                    epicKey: epic_title,
-                    summary: function_title,
+                    epicKey: epicTitle,
+                    summary: functionTitle,
                     assignee: assignee,
-                    labels: [labels],
+                    labels: [end],
                     description: description,
-                    components: components
+                    components: components,
+                    isTech: isTech
                 }, collectSubtasks(), (issue) => {
                     console.log(`create sub & function & epic task result => ${issue.key}`)
                     updateCreatedIssues(issue)
@@ -192,6 +198,7 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
         description: string,
         config: {
             epicEnable: boolean,
+            techCheckEnable: boolean,
             functionEnable: boolean,
             subEnable: boolean,
             assigneeEnable: boolean,
@@ -264,6 +271,7 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
             description: "创建Epic, Function-Task和Sub-Task",
             config: {
                 epicEnable: true,
+                techCheckEnable: true,
                 functionEnable: true,
                 subEnable: true,
                 assigneeEnable: true,
@@ -272,16 +280,17 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
                 subLabel: "Sub-Task list: ",
                 epicSeachFn: undefined,
                 epicPlaceHolder: "请输入",
-                epicRules: [{ required: true, message: "Epic title can't be empty!" }],
-                functionRules: [{ required: true, message: "Function title can't be empty!" }],
-                subRules: [{ required: true, message: "Sub-Task can't be empty!" }, { validator: subTaskValidator }],
-                assigneeRules: [{ required: true, message: "Assignee can't be empty!" }],
+                epicRules: [{required: true, message: "Epic title can't be empty!"}],
+                functionRules: [{required: true, message: "Function title can't be empty!"}],
+                subRules: [{required: true, message: "Sub-Task can't be empty!"}, {validator: subTaskValidator}],
+                assigneeRules: [{required: true, message: "Assignee can't be empty!"}],
             }
         },
         "function-sub": {
             description: "创建Function-Task和Sub-Task",
             config: {
                 epicEnable: true,
+                techCheckEnable: false,
                 functionEnable: true,
                 subEnable: true,
                 assigneeEnable: true,
@@ -290,7 +299,7 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
                 subLabel: "Sub-Task list: ",
                 epicSeachFn: epicSearchFunction,
                 epicPlaceHolder: "输入可以进行搜索",
-                epicRules: [{ required: true, message: "Parent ticket can't be empty!" }, {
+                epicRules: [{required: true, message: "Parent ticket can't be empty!"}, {
                     validator: (rule, value, callback) => {
                         if (!value) {
                             callback("Parent ticket can't be empty!")
@@ -301,15 +310,16 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
                         }
                     }
                 }],
-                functionRules: [{ required: true, message: "Function title can't be empty!" }],
-                subRules: [{ required: true, message: "Sub-Task can't be empty!" }, { validator: subTaskValidator }],
-                assigneeRules: [{ required: true, message: "Assignee can't be empty!" }],
+                functionRules: [{required: true, message: "Function title can't be empty!"}],
+                subRules: [{required: true, message: "Sub-Task can't be empty!"}, {validator: subTaskValidator}],
+                assigneeRules: [{required: true, message: "Assignee can't be empty!"}],
             }
         },
         "sub": {
             description: "只创建Sub-Task",
             config: {
                 epicEnable: true,
+                techCheckEnable: false,
                 functionEnable: false,
                 subEnable: true,
                 assigneeEnable: false,
@@ -318,7 +328,7 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
                 subLabel: "Sub-Task list: ",
                 epicSeachFn: functionSearchFunction,
                 epicPlaceHolder: "请输入",
-                epicRules: [{ required: true, message: "Parent ticket can't be empty!" }, {
+                epicRules: [{required: true, message: "Parent ticket can't be empty!"}, {
                     validator: (rule, value, callback) => {
                         if (!value) {
                             callback("Parent ticket can't be empty!")
@@ -330,7 +340,7 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
                     }
                 }],
                 functionRules: [],
-                subRules: [{ required: true, message: "Sub-Task can't be empty!" }, { validator: subTaskValidator }],
+                subRules: [{required: true, message: "Sub-Task can't be empty!"}, {validator: subTaskValidator}],
                 assigneeRules: [],
             }
         },
@@ -338,6 +348,7 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
             description: "只创建Function-Task",
             config: {
                 epicEnable: true,
+                techCheckEnable: false,
                 functionEnable: true,
                 subEnable: false,
                 assigneeEnable: true,
@@ -346,7 +357,7 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
                 subLabel: "Sub-Task list: ",
                 epicSeachFn: epicSearchFunction,
                 epicPlaceHolder: "可输入关键字进行搜索",
-                epicRules: [{ required: true, message: "Epic ticket can't be empty!" }, {
+                epicRules: [{required: true, message: "Epic ticket can't be empty!"}, {
                     validator: (rule, value, callback) => {
                         if (!value) {
                             callback("Epic ticket can't be empty!")
@@ -358,15 +369,16 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
                         }
                     }
                 }],
-                functionRules: [{ required: true, message: "Function title can't be empty!" }],
+                functionRules: [{required: true, message: "Function title can't be empty!"}],
                 subRules: [],
-                assigneeRules: [{ required: true, message: "Assignee can't be empty!" }],
+                assigneeRules: [{required: true, message: "Assignee can't be empty!"}],
             }
         },
         "epic": {
             description: "只创建Epic",
             config: {
                 epicEnable: true,
+                techCheckEnable: true,
                 functionEnable: false,
                 subEnable: false,
                 assigneeEnable: true,
@@ -375,10 +387,10 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
                 subLabel: "Sub-Task list: ",
                 epicSeachFn: undefined,
                 epicPlaceHolder: "输入可以进行搜索",
-                epicRules: [{ required: true, message: "Epic title can't be empty!" }],
+                epicRules: [{required: true, message: "Epic title can't be empty!"}],
                 functionRules: [],
                 subRules: [],
-                assigneeRules: [{ required: true, message: "Assignee can't be empty!" }],
+                assigneeRules: [{required: true, message: "Assignee can't be empty!"}],
             }
         },
     }
@@ -410,10 +422,11 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
     return (
         <div onClick={onRootClick}>
             <Form ref={formRef}
-                labelCol={{ span: 4 }}
-                wrapperCol={{ span: 14 }}
-                layout="horizontal"
-                onFinish={onFormFinish}>
+                  initialValues={{isTech: true}}
+                  labelCol={{span: 4}}
+                  wrapperCol={{span: 14}}
+                  layout="horizontal"
+                  onFinish={onFormFinish}>
                 <Form.Item name="mode" label="模式: ">
                     <Select defaultValue={defaultMode} onSelect={onModeSelect}>
                         {Object.keys(modes).map((key) => <Select.Option
@@ -422,33 +435,40 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
                 </Form.Item>
                 {/* <Divider>核心内容</Divider> */}
                 <Form.Item name="epic" label={modes[curMode].config.epicLabel}
-                    hidden={!modes[curMode].config.epicEnable}
-                    rules={modes[curMode].config.epicRules}>
+                           hidden={!modes[curMode].config.epicEnable}
+                           rules={modes[curMode].config.epicRules}>
                     <AutoComplete
                         showSearch
                         value={epicValue}
                         options={!epicList ? [] : epicList.map((item) => {
-                            return { label: `[${item.key}] ${item.fields?.summary ?? ""}`, value: item.key }
+                            return {label: `[${item.key}] ${item.fields?.summary ?? ""}`, value: item.key}
                         })}
                         onSearch={modes[curMode].config.epicSeachFn}
                         placeholder={modes[curMode].config.epicPlaceHolder}
                     />
+
+                </Form.Item>
+                <Form.Item name='isTech'
+                           hidden={!modes[curMode].config.techCheckEnable}
+                           valuePropName="checked"
+                           wrapperCol={{offset: 4, span: 14}}>
+                    <Checkbox>Is Tech Task</Checkbox>
                 </Form.Item>
                 <Form.Item name="function" label={modes[curMode].config.functionLabel}
-                    hidden={!modes[curMode].config.functionEnable}
-                    rules={modes[curMode].config.functionRules}>
-                    <Input />
+                           hidden={!modes[curMode].config.functionEnable}
+                           rules={modes[curMode].config.functionRules}>
+                    <Input/>
                 </Form.Item>
                 <Form.Item name="assignee" label="Assignee"
-                    hidden={!modes[curMode].config.assigneeEnable}
-                    rules={modes[curMode].config.assigneeRules}>
+                           hidden={!modes[curMode].config.assigneeEnable}
+                           rules={modes[curMode].config.assigneeRules}>
                     <AutoComplete
                         options={userList}
                         onSearch={(value) => {
                             userSearch(value, 100).then((list) => {
                                 setUserList((prev) => {
                                     return list?.map((item) => {
-                                        return { value: item.name }
+                                        return {value: item.name}
                                     }) ?? []
                                 })
                             }).catch((err) => {
@@ -459,24 +479,26 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
                     />
                 </Form.Item>
                 <Form.Item name="sub" label={modes[curMode].config.subLabel}
-                    hidden={!modes[curMode].config.subEnable}
-                    rules={modes[curMode].config.subRules}>
-                    <TextArea rows={10} placeholder="assignee: xin.wang@shopee.com&#10;Task 1 summary 1.5&#10;Task 2 summary 1&#10;assignee: others@shopee.com&#10;Other task 1 summary 1.5&#10;Other task 2 summary 1" />
+                           hidden={!modes[curMode].config.subEnable}
+                           rules={modes[curMode].config.subRules}>
+                    <TextArea rows={10}
+                              placeholder="assignee: xin.wang@shopee.com&#10;Task 1 summary 1.5&#10;Task 2 summary 1&#10;assignee: others@shopee.com&#10;Other task 1 summary 1.5&#10;Other task 2 summary 1"/>
                 </Form.Item>
                 {/* <Divider>其他内容</Divider> */}
 
                 <Form.Item name="components" label="Component: "
-                    rules={[{ required: true, message: "Components must not be empty." }]}>
-                    <Select mode='multiple' placeholder="从im/oa/sop/sos中选择">
+                           rules={[{required: true, message: "Components must not be empty."}]}>
+                    <Select mode='multiple' placeholder="从im/oa/sop/sos/data中选择">
                         <Select.Option value="im">im</Select.Option>
                         <Select.Option value="oa">oa</Select.Option>
                         <Select.Option value="sop">sop</Select.Option>
                         <Select.Option value="sos">sos</Select.Option>
+                        <Select.Option value="sos">data</Select.Option>
                     </Select>
                 </Form.Item>
 
-                <Form.Item name="labels" label="Labels: " help=""
-                    rules={[{ required: true, message: "Labels must not be empty." }]}>
+                <Form.Item name="end" label="End: " help=""
+                           rules={[{required: true, message: "End must not be empty."}]}>
                     <Select placeholder="从Android/iOS/FE/BE/QA中选择">
                         <Select.Option value="Android">Android</Select.Option>
                         <Select.Option value="iOS">iOS</Select.Option>
@@ -487,14 +509,16 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
                 </Form.Item>
 
                 <Form.Item name="discription" label="Description: ">
-                    <TextArea rows={10} />
+                    <TextArea rows={3}/>
                 </Form.Item>
 
                 {/* <Divider/> */}
                 <Form.Item name="create" label='创建: '>
                     <Space size='small'>
                         <Button type="primary" htmlType='submit'>开始创建</Button>
-                        <Button type="default" onClick={(e) => { showDrawer() }}>显示进展</Button>
+                        <Button type="default" onClick={(e) => {
+                            showDrawer()
+                        }}>显示进展</Button>
                     </Space>
                 </Form.Item>
             </Form>
@@ -507,7 +531,7 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
                 dataSource={createdIssues}
                 renderItem={(item) => (
                     <List.Item onClick={(value) => {
-                        const { shell } = require('@electron/remote');
+                        const {shell} = require('@electron/remote');
                         shell.openExternal(`https://${JIRA_DOMAIN}/browse/${item.key}`);
                     }}>
                         {`[${item.fields.issuetype.name}] ${item.fields.summary} => https://${JIRA_DOMAIN}/browse/${item.key}`}

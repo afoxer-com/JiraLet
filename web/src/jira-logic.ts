@@ -72,7 +72,8 @@ export interface IssueInfo {
     assignee: string,
     labels: string[],
     description: string,
-    components: string[]
+    components: string[],
+    isTech: boolean,
 }
 
 function namesToComponents(names: string[], ctx: Context): { id: string }[] {
@@ -90,13 +91,17 @@ function namesToComponents(names: string[], ctx: Context): { id: string }[] {
 
 export function createEpic(info: IssueInfo, fetchCtx: boolean = true): Promise<Issue> {
     progressLogger(`Begin creating epic: ${info.summary}`)
+    let summary = info.summary;
+    if (info.isTech && !summary.startsWith('【Tech】')) {
+        summary = `【Tech】${summary}`
+    }
     return collectInfo(fetchCtx).then((ctx) => {
         let request = {
             fields: {
                 project: {
                     id: ctx.project.id
                 },
-                summary: info.summary,
+                summary: summary,
                 customfield_10003: info.summary,
                 issuetype: {
                     id: ctx.epic?.id ?? ""
@@ -128,10 +133,10 @@ export function createFunction(info: FunctionInfo, fetchCtx: boolean = true): Pr
     progressLogger(`Begin creating function task: ${info.summary}`)
     return collectInfo(fetchCtx).then((ctx) => {
         let summary;
-        if (!info.summary.includes(`【${info.labels[0]}】`)) {
+        if (!info.summary.toString().includes(`【${info.labels[0]}】`)) {
             summary = `【${info.labels[0]}】${info.summary}`;
         }
-        if (!info.summary.startsWith("【Function】")) {
+        if (!info.summary.toString().startsWith("【Function】")) {
             summary = `【Function】${summary}`;
         } else {
             summary = info.summary;
@@ -354,7 +359,7 @@ export const epicSearch = (value: string): Promise<QueriedIssue[]> => {
     if (value.startsWith(`${SEATALK_PRJ_KEY}-`)) {
         jql = `project=${SEATALK_PRJ_KEY} AND type=Epic AND key='${value}' ORDER BY key DESC`;
     } else {
-        jql = `project=${SEATALK_PRJ_KEY} AND type=epic AND summary ~${value} ORDER BY key DESC`;
+        jql = `project=${SEATALK_PRJ_KEY} AND type=epic AND summary ~'${value}' ORDER BY key DESC`;
     }
     return debounceSearch(value, jql, 200)
 }
@@ -364,7 +369,7 @@ export const functionSearch = (value: string): Promise<QueriedIssue[]> => {
     if (value.startsWith(`${SEATALK_PRJ_KEY}-`)) {
         jql = `project=${SEATALK_PRJ_KEY} AND (type=Epic OR type=Task) AND key='${value}' ORDER BY key DESC`;
     } else {
-        jql = `project=${SEATALK_PRJ_KEY} AND (type=Epic OR type=Task) AND summary ~${value} ORDER BY key DESC`;
+        jql = `project=${SEATALK_PRJ_KEY} AND (type=Epic OR type=Task) AND summary ~'${value}' ORDER BY key DESC`;
     }
     return debounceSearch(value, jql, 200)
 }
