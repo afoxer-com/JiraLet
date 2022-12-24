@@ -11,7 +11,7 @@ import {
     createEpic, createEpicFuncSubTasks,
     createFunction,
     createFunctionAndSubTasks,
-    createSubTasks,
+    createSubTasks, createTechAndSubTasks, createTechTask,
     epicSearch,
     functionSearch,
     setProcesser,
@@ -64,7 +64,7 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
         let subtasks: string = fieldsValue['sub'] ?? ""
         let description: string = fieldsValue['description'] ?? ""
         let assignee: string = fieldsValue['assignee'] ?? ""
-        let isTech: boolean = fieldsValue['isTech']
+        let isTech: boolean = modes[curMode].config.techCheckEnable ? fieldsValue['isTech'] : (curMode == 'tech-sub' || curMode == 'tech')
 
         const collectSubtasks = (): SubTaskInfo[] => {
             console.log('begin collecting sub tasks.')
@@ -134,6 +134,22 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
                 })
                 break;
             }
+            case "tech": {
+                createTechTask({
+                    summary: functionTitle,
+                    assignee: assignee,
+                    labels: [end],
+                    description: description,
+                    components: components,
+                    isTech: isTech
+                }).then((issue: Issue) => {
+                    console.log(`abtain issue result after create => ${JSON.stringify(issue)}`)
+                    updateCreatedIssues(issue)
+                }).catch((err) => {
+                    console.error(`Err when create tech issue => ${err}`)
+                })
+                break;
+            }
             case "sub": {
                 createSubTasks(collectSubtasks(), (issue) => {
                     console.log(`create sub task result => ${issue.key}`)
@@ -144,6 +160,20 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
             case "function-sub": {
                 createFunctionAndSubTasks({
                     epicKey: epicTitle,
+                    summary: functionTitle,
+                    assignee: assignee,
+                    labels: [end],
+                    description: description,
+                    components: components,
+                    isTech: isTech,
+                }, collectSubtasks(), (issue) => {
+                    console.log(`create sub & function task result => ${issue.key}`)
+                    updateCreatedIssues(issue)
+                })
+                break;
+            }
+            case "tech-sub": {
+                createTechAndSubTasks({
                     summary: functionTitle,
                     assignee: assignee,
                     labels: [end],
@@ -286,6 +316,25 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
                 assigneeRules: [{required: true, message: "Assignee can't be empty!"}],
             }
         },
+        "tech-sub": {
+            description: "创建Tech-Task和Sub-Task (单端技术需求)",
+            config: {
+                epicEnable: false,
+                techCheckEnable: false,
+                functionEnable: true,
+                subEnable: true,
+                assigneeEnable: true,
+                epicLabel: "Epic Title: ",
+                functionLabel: "Task title: ",
+                subLabel: "Sub-Task list: ",
+                epicSeachFn: undefined,
+                epicPlaceHolder: "请输入",
+                epicRules: [],
+                functionRules: [{required: true, message: "Task title can't be empty!"}],
+                subRules: [{required: true, message: "Sub-Task can't be empty!"}, {validator: subTaskValidator}],
+                assigneeRules: [{required: true, message: "Assignee can't be empty!"}],
+            }
+        },
         "function-sub": {
             description: "创建Function-Task和Sub-Task",
             config: {
@@ -370,6 +419,25 @@ function Jira(props: { onJiraTokenEmpty: () => void }) {
                     }
                 }],
                 functionRules: [{required: true, message: "Function title can't be empty!"}],
+                subRules: [],
+                assigneeRules: [{required: true, message: "Assignee can't be empty!"}],
+            }
+        },
+        "tech": {
+            description: "只创建Tech-Task  (单端技术需求)",
+            config: {
+                epicEnable: false,
+                techCheckEnable: false,
+                functionEnable: true,
+                subEnable: false,
+                assigneeEnable: true,
+                epicLabel: "Epic Title: ",
+                functionLabel: "Task title: ",
+                subLabel: "Sub-Task list: ",
+                epicSeachFn: undefined,
+                epicPlaceHolder: "请输入",
+                epicRules: [],
+                functionRules: [{required: true, message: "Task title can't be empty!"}],
                 subRules: [],
                 assigneeRules: [{required: true, message: "Assignee can't be empty!"}],
             }

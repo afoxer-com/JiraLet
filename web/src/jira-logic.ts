@@ -129,14 +129,58 @@ export interface FunctionInfo extends IssueInfo {
     epicKey: string,
 }
 
+export function createTechTask(info: IssueInfo, fetchCtx: boolean = true): Promise<Issue> {
+    progressLogger(`Begin creating tech task: ${info.summary}`)
+
+    return collectInfo(fetchCtx).then((ctx) => {
+        let summary;
+        if (!info.summary.includes(`【${info.labels[0]}】`)) {
+            summary = `【${info.labels[0]}】${info.summary}`;
+        }
+        if (!info.summary.startsWith("【Tech】")) {
+            summary = `【Tech】${summary}`;
+        } else {
+            summary = info.summary;
+        }
+
+        let request = {
+            fields: {
+                project: {
+                    id: ctx.project.id
+                },
+                summary: summary,
+                customfield_10003: undefined,
+                issuetype: {
+                    id: ctx.task?.id ?? ""
+                },
+                assignee: {
+                    name: info.assignee
+                },
+                reporter: {
+                    name: ctx.myself.name
+                },
+                labels: info.labels,
+                description: info.description == "" ? undefined : info.description,
+                components: namesToComponents(info.components, ctx)
+            }
+        }
+
+        return createIssue(request).then((result: IssueCreateResult) => {
+            progressLogger(`Finish creating function task: ${result.key}/${info.summary}`)
+            console.log(`create issue result => ${JSON.stringify(result)}`)
+            return fetchIssue(result.id)
+        })
+    })
+}
+
 export function createFunction(info: FunctionInfo, fetchCtx: boolean = true): Promise<Issue> {
     progressLogger(`Begin creating function task: ${info.summary}`)
     return collectInfo(fetchCtx).then((ctx) => {
         let summary;
-        if (!info.summary.toString().includes(`【${info.labels[0]}】`)) {
+        if (!info.summary.includes(`【${info.labels[0]}】`)) {
             summary = `【${info.labels[0]}】${info.summary}`;
         }
-        if (!info.summary.toString().startsWith("【Function】")) {
+        if (!info.summary.startsWith("【Function】")) {
             summary = `【Function】${summary}`;
         } else {
             summary = info.summary;
@@ -273,6 +317,24 @@ export function createFunctionAndSubTasks(task: FunctionInfo, subtasks: SubTaskI
         }, false)
     }).catch((err) => {
         progressLogger(`Facing error when creating Function Task: ${task.summary}, error: ${err}`)
+    })
+}
+
+export function createTechAndSubTasks(task: IssueInfo, subtasks: SubTaskInfo[], callback: (issue: Issue) => void) {
+    console.log(`begin create tech task for ${JSON.stringify(task)}`)
+    createTechTask(task, true).then((functionIssue) => {
+        subtasks.forEach((item) => {
+            item.parentKey = functionIssue.key
+        })
+
+        callback(functionIssue);
+        progressLogger(`Begin creating sub tasks.`)
+        createSubTasks(subtasks, (issue) => {
+            progressLogger(`Finish creating sub task: ${issue.key}}.`)
+            callback(issue)
+        }, false)
+    }).catch((err) => {
+        progressLogger(`Facing error when creating Tech Task: ${task.summary}, error: ${err}`)
     })
 }
 
