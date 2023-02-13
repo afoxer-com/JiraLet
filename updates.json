@@ -1,8 +1,8 @@
 {
     "darwin-x64-prod": {
         "readme": "Normal Release",
-        "update": "https://github.com/afoxer-com/JiraLet/releases/download/1.4.0/release.json",
-        "install": "https://github.com/afoxer-com/JiraLet/releases/download/1.4.0/jiralet-1.4.0.dmg",
-        "version": "1.4.0"
+        "update": "https://github.com/afoxer-com/JiraLet/releases/download/1.5.0/release.json",
+        "install": "https://github.com/afoxer-com/JiraLet/releases/download/1.5.0/jiralet-1.5.0.dmg",
+        "version": "1.5.0"
     }
 }
