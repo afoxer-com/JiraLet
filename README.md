@@ -1,4 +1,5 @@
 # JiraLet
+- 1.8.0
 - 1.4.0 
 Refactor all features.
 - 1.3.0 
