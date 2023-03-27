@@ -2,7 +2,7 @@
     "darwin-x64-prod": {
         "readme": "Normal Release",
         "update": "https://github.com/afoxer-com/JiraLet/releases/download/1.10.1/release.json",
-        "install": "https://github.com/afoxer-com/JiraLet/releases/download/1.10.1/jiralet-1.10.1.dmg",
+        "install": "https://github.com/afoxer-com/JiraLet/releases/download/1.10.1/JiraLet-1.10.1.dmg",
         "version": "1.10.1"
     }
 }
