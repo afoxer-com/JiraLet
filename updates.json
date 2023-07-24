@@ -3,6 +3,6 @@
     "readme": "Normal Release",
     "update": "https://github.com/afoxer-com/JiraLet/releases/download/1.15.0/release.json",
     "install": "https://github.com/afoxer-com/JiraLet/releases/download/1.15.0/JiraLet-1.15.0.dmg",
-    "version": "1.15.0"
+    "version": "1.15.1"
   }
 }
