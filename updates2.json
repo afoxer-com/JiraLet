@@ -1,7 +1,7 @@
 {
   "darwin-x64-prod": {
     "readme": "Normal Release",
-    "update": "https://raw.githubusercontent.com/afoxer-com/JiraLet/main/release.json",
+    "update": "https://raw.githubusercontent.com/afoxer-com/JiraLet/refs/heads/main/release.json",
     "version": "1.19.0"
   }
 }
